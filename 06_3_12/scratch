@@ -2,7 +2,7 @@ __attribute__((cleanup))
 
 int c __attribute__((cleanup(a))) = 7;
 
-void v() __attribute__((constructor(100))) {
+__attribute__((constructor(100))) void v() {
 
 }
 
@@ -14,3 +14,4 @@ longjmp
 
 
 [ x x x ]
+
