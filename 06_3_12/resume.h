@@ -45,7 +45,7 @@ void __jmp_stack_push_block() {
 
 // push a jmp_buf to the stack, allocating a new block if necessary
 jmp_buf* __jmp_stack_push() {
-    if (__jmp_stack.envs_blocks_current->top > __jmp_stack.envs_blocks_current->size-2) {
+    if (__jmp_stack.envs_blocks_current->top >= __jmp_stack.envs_blocks_current->size-1) {
         __jmp_stack_push_block();
     }
     __jmp_stack.envs_blocks_current->top++;
@@ -84,15 +84,16 @@ __attribute__((destructor)) void __jmp_stack_des() {
 // pop a jmp_buf from the stack
 void __jmp_stack_pop(int*) {
     __jmp_stack.envs_blocks_current->top--;
-    if (__jmp_stack.envs_blocks_current->top < -1) {
-        __jmp_stack.envs_blocks_current = __jmp_stack.envs_blocks_current->last;
+    if (__jmp_stack.envs_blocks_current->top <= -1) {
+        if (__jmp_stack.envs_blocks_current->last != NULL)
+            __jmp_stack.envs_blocks_current = __jmp_stack.envs_blocks_current->last;
     }
 }
 
 // set a resume point using the jmp stack
 #define set_resume_point()                         \
     int __resume_point_flag##__COUNTER__           \
-    __attribute__((cleanup(__jmp_stack_pop)))      \
+        __attribute__((cleanup(__jmp_stack_pop)))  \
     = setjmp(*__jmp_stack_push())
 
 // jump to the most recent resume point
